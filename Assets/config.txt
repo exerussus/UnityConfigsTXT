@@ -1,0 +1,3 @@
+moveSpeed=3
+range=4
+waitTimer=5
