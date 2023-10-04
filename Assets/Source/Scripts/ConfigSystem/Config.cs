@@ -7,6 +7,7 @@ namespace Source.Scripts.ConfigSystem
         [SerializeField] private float moveSpeed;
         [SerializeField] private float range;
         [SerializeField] private float waitTime;
+        [SerializeField] private float delay;
 
         public float MoveSpeed => moveSpeed;
         public float Range => range;
@@ -14,22 +15,20 @@ namespace Source.Scripts.ConfigSystem
         
         private const string nameMoveSpeed = "moveSpeed";
         private const string nameRange = "range";
-        private const string nameWaitTimer = "waitTimer";
+        private const string nameWaitTime = "waitTime";
+        private const string nameDelay = "delay";
+        
+        private const string descriptionMoveSpeed = "Скорость персонажа";
+        private const string descriptionRange = "Радиус атаки";
+        private const string descriptionWaitTime = "Ожидание после атаки";
+        private const string descriptionDelay = "Мы что-то ожидаем";
 
         protected override void InitFields()
         {
-            Debug.Log($"waitTime = {waitTime}");
-            moveSpeed = GetValueOrSetDefault(nameMoveSpeed, moveSpeed);
-            range = GetValueOrSetDefault(nameRange, range);
-            waitTime = GetValueOrSetDefault(nameWaitTimer, waitTime);
-        }
-
-        protected override void UpdateFields()
-        {
-            moveSpeed = GetValue(nameMoveSpeed);
-            range = GetValue(nameRange);
-            waitTime = GetValue(nameWaitTimer);
-            Debug.Log("fields updated");
+            moveSpeed = GetValueOrSetDefault(nameMoveSpeed, descriptionMoveSpeed, moveSpeed);
+            range = GetValueOrSetDefault(nameRange, descriptionRange, range);
+            waitTime = GetValueOrSetDefault(nameWaitTime, descriptionWaitTime, waitTime);
+            delay = GetValueOrSetDefault(nameDelay, descriptionDelay, delay);
         }
     }
 }
