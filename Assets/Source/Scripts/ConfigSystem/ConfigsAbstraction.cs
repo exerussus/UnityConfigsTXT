@@ -28,7 +28,7 @@ namespace Source.Scripts.ConfigSystem
         
         protected abstract void InitFields();
 
-        private void CheckHashSum()
+        public void CheckHashSum()
         {
             var hash = GetConfigHash();
 
@@ -167,11 +167,6 @@ namespace Source.Scripts.ConfigSystem
             if (string.IsNullOrEmpty(rawData[0])) return false;
             if (rawData[0][0] == '[') return false;
             return true;
-        }
-
-        private void FixedUpdate()
-        {
-            CheckHashSum();
         }
     }
 }
