@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Source.Scripts.ConfigSystem
 {
-    public abstract class ConfigsAbstraction : MonoBehaviour
+    public abstract class ConfigsAbstraction
     {
         private string _configPath = "config.txt";
         private string[] _configLines;
@@ -37,7 +37,6 @@ namespace Source.Scripts.ConfigSystem
                 LoadConfig();
                 _hash = hash;
                 InitFields();
-                
             }
         }
         
@@ -78,7 +77,6 @@ namespace Source.Scripts.ConfigSystem
                 _defaultValues[valueName] = configAttribute;
             }
             
-            Debug.Log($"{valueName} : {defaultValue}");
             float value = 0;
             bool isFound = false;
             foreach (string line in _configLines)
@@ -91,25 +89,74 @@ namespace Source.Scripts.ConfigSystem
             
                 if (string.Equals(data[0], valueName, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    var resultString = data[1].Replace(".", ",");
-                    value = float.Parse(resultString);
+                    value = ParseToFloat(data[1]);
                     isFound = true;
                     break;
                 }
             }
             if (!isFound)
             {
-                var resultLine = $"{valueName}={_defaultValues[valueName].DefaultValue}{GetEmptySpaces(valueName)}# {_defaultValues[valueName].DefaultDescription}";
+                var resultLine = $"{valueName}={_defaultValues[valueName].DefaultFloatValue}{GetEmptySpaces(valueName)}  # {_defaultValues[valueName].DefaultDescription}";
                 SaveNewLineToConfig(resultLine);
-                value = _defaultValues[valueName].DefaultValue;
+                value = _defaultValues[valueName].DefaultFloatValue;
+            }
+        
+            return value;
+        }
+        
+        protected string GetValueOrSetDefault(string valueName, string description, string defaultValue)
+        {
+            if (!_isInitialized)
+            {
+                var configAttribute = new ConfigAttribute(defaultValue, description);
+                _defaultValues[valueName] = configAttribute;
+            }
+            
+            string value = "";
+            bool isFound = false;
+            foreach (string line in _configLines)
+            {
+                var rawLine = line.Trim().Split('#');
+                var rawData = rawLine[0].Trim().Split('=');
+                if (!Validate(rawData)) continue;
+                
+                var data = new[]{ rawData[0].Trim(), rawData[1].Trim() };
+            
+                if (string.Equals(data[0], valueName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    value = ParseToString(data[1]);
+                    isFound = true;
+                    break;
+                }
+            }
+            if (!isFound)
+            {
+                var resultLine = $"{valueName}={'"'}{_defaultValues[valueName].DefaultStringValue}{'"'}{GetEmptySpaces(valueName)}  # {_defaultValues[valueName].DefaultDescription}";
+                SaveNewLineToConfig(resultLine);
+                value = _defaultValues[valueName].DefaultStringValue;
             }
         
             return value;
         }
 
+        private string ParseToString(string text)
+        {
+            var resultString = text.Replace("\"", "");
+            return resultString;
+        }
+        
+        private float ParseToFloat(string text)
+        {
+            var resultString = text.Replace(".", ",");
+            return float.Parse(resultString);
+        }
+        
         private string GetEmptySpaces(string valueName)
         {
-            var holdingLetters = 31 - valueName.Length - _defaultValues[valueName].DefaultValue.ToString(CultureInfo.InvariantCulture).Length;
+            var configAttribute = _defaultValues[valueName];
+            var valueString = configAttribute.DefaultStringValue == null ? configAttribute.DefaultFloatValue.ToString(CultureInfo.InvariantCulture) : configAttribute.DefaultStringValue + "..";
+            var holdingLetters = 40 - valueName.Length - valueString.Length;
+            if (holdingLetters < 1) holdingLetters = 1;
             var result = new StringBuilder().Insert(0, " ", holdingLetters).ToString(); 
             return result;
         }
@@ -120,36 +167,6 @@ namespace Source.Scripts.ConfigSystem
             if (string.IsNullOrEmpty(rawData[0])) return false;
             if (rawData[0][0] == '[') return false;
             return true;
-        }
-        
-        public float GetValue(string valueName)
-        {
-            float value = 0;
-            bool isFound = false;
-
-            foreach (string line in _configLines)
-            {
-                var rawLine = line.Trim().Split('#');
-                var rawData = rawLine[0].Trim().Split('=');
-                if (!Validate(rawData)) continue;
-            
-                var data = new[]{ rawData[0].Trim(), rawData[1].Trim() };
-            
-                if (string.Equals(data[0], valueName, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    var resultString = data[1].Replace(".", ",");
-                    value = float.Parse(resultString);
-                    isFound = true;
-                    break;
-                }
-            }
-
-            if (!isFound)
-            {
-                value = GetValueOrSetDefault(valueName, _defaultValues[valueName].DefaultDescription, _defaultValues[valueName].DefaultValue);
-            }
-            
-            return value;
         }
 
         private void FixedUpdate()

@@ -1,3 +1,5 @@
-moveSpeed=3
-range=4
-waitTimer=5
+moveSpeed=3                                # Скорость персонажа
+range=4                                    # Радиус атаки
+waitTime=5                                 # Ожидание после атаки
+delay=2                                    # Мы что-то ожидаем
+link="some-link\some-directory"            # Какая-то ссылка
