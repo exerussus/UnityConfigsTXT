@@ -13,17 +13,33 @@ namespace Source.Scripts.ConfigSystem
         private string _configPath = "config.txt";
         private string[] _configLines;
         private string _hash;
-        private string _resultPath => Application.dataPath + "/" + _configPath; 
+        private string _resultPath => Path.Combine(Application.streamingAssetsPath, "config.txt");
         private bool _isInitialized;
         private Dictionary<string, ConfigAttribute> _defaultValues = new Dictionary<string, ConfigAttribute>();
         
         public void Initialize()
         {
+            CheckExist();
             _isInitialized = false;
             LoadConfig();
             InitFields();
             _isInitialized = true;
 
+        }
+
+        private void CheckExist()
+        {
+            if (!Directory.Exists(Application.streamingAssetsPath))
+            {
+                Directory.CreateDirectory(Application.streamingAssetsPath);
+                Debug.Log("Streaming Assets folder created at: " + Application.streamingAssetsPath);
+            }
+
+            if (!File.Exists(_resultPath))
+            {
+                File.Create(_resultPath);
+                Debug.Log("Config file created at: " + _resultPath);
+            }
         }
         
         protected abstract void InitFields();
